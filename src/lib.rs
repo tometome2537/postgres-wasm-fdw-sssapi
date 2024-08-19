@@ -1,29 +1,28 @@
 #[allow(warnings)]
 mod bindings;
-use std::fmt::format;
 
 use serde_json::Value as JsonValue;
 
 use bindings::{
     exports::supabase::wrappers::routines::Guest,
     supabase::wrappers::{
-        http, time,
+        http,
         types::{Cell, Context, FdwError, FdwResult, OptionsType, Row, TypeOid},
         utils,
     },
 };
 
 #[derive(Debug, Default)]
-struct ExampleFdw {
+struct SSSApiFdw {
     base_url: String,
     src_rows: Vec<JsonValue>,
     src_idx: usize,
 }
 
 // pointer for the static FDW instance
-static mut INSTANCE: *mut ExampleFdw = std::ptr::null_mut::<ExampleFdw>();
+static mut INSTANCE: *mut SSSApiFdw = std::ptr::null_mut::<SSSApiFdw>();
 
-impl ExampleFdw {
+impl SSSApiFdw {
     // initialise FDW instance
     fn init_instance() {
         let instance = Self::default();
@@ -37,11 +36,11 @@ impl ExampleFdw {
     }
 }
 
-impl Guest for ExampleFdw {
+impl Guest for SSSApiFdw {
     fn host_version_requirement() -> String {
         // semver expression for Wasm FDW host version requirement
         // ref: https://docs.rs/semver/latest/semver/enum.Op.html
-        "^0.1.0".to_string()
+        "^1.0.0".to_string()
     }
 
     fn init(ctx: &Context) -> FdwResult {
@@ -122,6 +121,7 @@ impl Guest for ExampleFdw {
                     }
                 };
 
+                //TODO: Add some types
                 // let v = match tgt_col.type_oid() {
                 //     TypeOid::F64 => "F64",
                 //     TypeOid::Numeric => "Numeric",
@@ -176,4 +176,4 @@ impl Guest for ExampleFdw {
     }
 }
 
-bindings::export!(ExampleFdw with_types_in bindings);
+bindings::export!(SSSApiFdw with_types_in bindings);

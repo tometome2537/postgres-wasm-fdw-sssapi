@@ -1,6 +1,6 @@
-package my-company:example-fdw@0.1.0;
+package ruchi12377:sssapi-fdw@1.0.0;
 
-world example {
+world sssapi {
     import supabase:wrappers/http@0.1.0;
     import supabase:wrappers/jwt@0.1.0;
     import supabase:wrappers/stats@0.1.0;
