@@ -103,16 +103,6 @@ impl Guest for ExampleFdw {
             return Ok(None);
         }
 
-        // extract current source row, an example of the source row in JSON:
-        // {
-        //   "c": [{
-        //      "v": 1.0,
-        //      "f": "1"
-        //    }, {
-        //      "v": "Erlich Bachman"
-        //    }, null, null, null, null, { "v": null }
-        //    ]
-        // }
         let src_row = &this.src_rows[this.src_idx];
 
         // loop through each target column, map source cell to target cell
