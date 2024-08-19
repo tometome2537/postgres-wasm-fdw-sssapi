@@ -111,6 +111,7 @@ impl Guest for ExampleFdw {
                 // we only support I64 and String cell types here, add more type
                 // conversions if you need
                 let cell = match tgt_col.type_oid() {
+                    TypeOid::Bool => src.as_bool().map(|v| Cell::Bool(v)),
                     TypeOid::I64 => src.as_f64().map(|v| Cell::I64(v as _)),
                     TypeOid::String => src.as_str().map(|v| Cell::String(v.to_owned())),
                     _ => {
@@ -122,15 +123,8 @@ impl Guest for ExampleFdw {
                 };
 
                 // let v = match tgt_col.type_oid() {
-                //     TypeOid::Bool => "Bool",
-                //     TypeOid::I8 => "I8",
-                //     TypeOid::I16 => "I16",
-                //     TypeOid::F32 => "F32",
-                //     TypeOid::I32 => "I32",
                 //     TypeOid::F64 => "F64",
-                //     TypeOid::I64 => "I64",
                 //     TypeOid::Numeric => "Numeric",
-                //     TypeOid::String => "String",
                 //     TypeOid::Date => "Date",
                 //     TypeOid::Timestamp => "Timestamp",
                 //     TypeOid::Timestamptz => "Timestamptz",
@@ -138,11 +132,9 @@ impl Guest for ExampleFdw {
                 // };
 
                 // push the cell to target row
-                // row.push(Some(&Cell::String(serde_json::to_string(&src).unwrap())));
                 row.push(cell.as_ref());
             } else {
-                row.push(Some(&Cell::String(format!("{} is none", tgt_col_name))));
-                // row.push(None);
+                row.push(None);
             }
         }
 
