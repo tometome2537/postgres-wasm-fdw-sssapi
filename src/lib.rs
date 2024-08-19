@@ -1,5 +1,7 @@
 #[allow(warnings)]
 mod bindings;
+use std::fmt::format;
+
 use serde_json::Value as JsonValue;
 
 use bindings::{
@@ -48,7 +50,7 @@ impl Guest for ExampleFdw {
 
         // get API URL from foreign server options if it is specified
         let opts = ctx.get_options(OptionsType::Server);
-        this.base_url = opts.require_or("base_url", "https://docs.google.com/spreadsheets/d");
+        this.base_url = opts.require_or("base_url", "https://api.sssapi.app");
 
         Ok(())
     }
@@ -58,15 +60,12 @@ impl Guest for ExampleFdw {
 
         // get sheet id from foreign table options and make the request URL
         let opts = ctx.get_options(OptionsType::Table);
-        let sheet_id = opts.require("sheet_id")?;
-        let url = format!("{}/{}/gviz/tq?tqx=out:json", this.base_url, sheet_id);
+        let sssapi_id = opts.require("sssapi_id")?;
+        let url = format!("{}/{}", this.base_url, sssapi_id);
 
         // make up request headers
-        let headers: Vec<(String, String)> = vec![
-            ("user-agent".to_owned(), "Sheets FDW".to_owned()),
-            // header to make JSON response more cleaner
-            ("x-datasource-auth".to_owned(), "true".to_owned()),
-        ];
+        let headers: Vec<(String, String)> =
+            vec![("user-agent".to_owned(), "Sheets FDW".to_owned())];
 
         // make a request to Google API and parse response as JSON
         let req = http::Request {
@@ -77,14 +76,15 @@ impl Guest for ExampleFdw {
         };
         let resp = http::get(&req)?;
         // remove invalid prefix from response to make a valid JSON string
-        let body = resp.body.strip_prefix(")]}'\n").ok_or("invalid response")?;
+        let body = resp.body.as_str();
         let resp_json: JsonValue = serde_json::from_str(body).map_err(|e| e.to_string())?;
 
         // extract source rows from response
         this.src_rows = resp_json
-            .pointer("/table/rows")
+            .as_array()
             .ok_or("cannot get rows from response")
-            .map(|v| v.as_array().unwrap().to_owned())?;
+            .unwrap()
+            .to_owned();
 
         // output a Postgres INFO to user (visible in psql), also useful for debugging
         utils::report_info(&format!(
@@ -118,7 +118,7 @@ impl Guest for ExampleFdw {
         // loop through each target column, map source cell to target cell
         for tgt_col in ctx.get_columns() {
             let (tgt_col_num, tgt_col_name) = (tgt_col.num(), tgt_col.name());
-            if let Some(src) = src_row.pointer(&format!("/c/{}/v", tgt_col_num - 1)) {
+            if let Some(src) = src_row.get(usize::try_from(tgt_col_num).unwrap() - 1) {
                 // we only support I64 and String cell types here, add more type
                 // conversions if you need
                 let cell = match tgt_col.type_oid() {
