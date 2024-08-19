@@ -1,4 +1,4 @@
-package ruchi12377:sssapi-fdw@1.0.0;
+package ruchi12377:sssapi-fdw@1.0.1;
 
 world sssapi {
     import supabase:wrappers/http@0.1.0;

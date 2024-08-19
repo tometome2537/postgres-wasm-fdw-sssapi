@@ -40,7 +40,7 @@ impl Guest for SSSApiFdw {
     fn host_version_requirement() -> String {
         // semver expression for Wasm FDW host version requirement
         // ref: https://docs.rs/semver/latest/semver/enum.Op.html
-        "^1.0.0".to_string()
+        "^0.1.0".to_string()
     }
 
     fn init(ctx: &Context) -> FdwResult {
@@ -105,7 +105,7 @@ impl Guest for SSSApiFdw {
 
         // loop through each target column, map source cell to target cell
         for tgt_col in ctx.get_columns() {
-            let (tgt_col_num, tgt_col_name) = (tgt_col.num(), tgt_col.name());
+            let tgt_col_name = tgt_col.name();
             if let Some(src) = src_row.get(tgt_col_name.to_owned()) {
                 // we only support I64 and String cell types here, add more type
                 // conversions if you need

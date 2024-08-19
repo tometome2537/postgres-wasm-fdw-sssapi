@@ -2,31 +2,47 @@
 
 This project demostrates how to create a Postgres Foreign Data Wrapper with Wasm, using the [Wrappers framework](https://github.com/supabase/wrappers).
 
-This example reads the [realtime GitHub events](https://api.github.com/events) into a Postgres database. 
-
-## Project Structure
-
-```bash
-├── src
-│   └── lib.rs              # The package source code. We will implement the FDW logic, in this file.
-├── supabase-wrappers-wit   # The Wasm Interface Type provided by Supabase. See below for a detailed description.
-│   ├── http.wit
-│   ├── jwt.wit
-│   ├── routines.wit
-│   ├── stats.wit
-│   ├── time.wit
-│   ├── types.wit
-│   ├── utils.wit
-│   └── world.wit
-└── wit                     # The WIT interface this project will use to build the Wasm package.
-    └── world.wit
-```
-
-A [Wasm Interface Type](https://github.com/bytecodealliance/wit-bindgen) (WIT) defines the interfaces between the Wasm FDW (guest) and the Wasm runtime (host). For example, the `http.wit` defines the HTTP related types and functions can be used in the guest, and the `routines.wit` defines the functions the guest needs to implement.
+This example reads the [realtime GitHub events](https://api.github.com/events) into a Postgres database.
 
 ## Getting started
 
-To get started, visit the [Wasm FDW developing guide](https://fdw.dev/guides/create-wasm-wrapper/).
+まずは [Wasm FDW developing guide](https://fdw.dev/guides/create-wasm-wrapper/)にアクセスし
+**Add wasm32-unknown-unknown target**と**Install the WebAssembly Component Model subcommand**のステップを行なってください。
+
+Supabaseのダッシュボード>SQLエディターを開き、
+
+```sql
+create extension if not exists wrappers with schema extensions;
+
+create foreign data wrapper wasm_wrapper
+  handler wasm_fdw_handler
+  validator wasm_fdw_validator;
+
+create server sssapi_server
+  foreign data wrapper wasm_wrapper
+  options (
+    fdw_package_url 'https://github.com/tometome2537/postgres-wasm-fdw-sssapi/releases/download/v1.0.1/wasm_fdw_sssapi.wasmwasm_fdw_example.wasm',
+    fdw_package_name 'ruchi12377:sssapi-fdw',
+    fdw_package_version '1.0.1',
+    fdw_package_checksum ''
+    );
+
+create schema if not exists spreadsheet;
+
+create foreign table spreadsheet.entity (
+  id TEXT,
+  public BOOLEAN,
+  -- カラム名がキャメルケースの場合は""で囲む。
+  -- カラム名が勝手に小文字に変更されてしまうので。
+  "fullName" TEXT,
+)
+server sssapi_server
+options (
+  -- ここにAPIのIDを入れる
+  sssapi_id ''
+);
+
+```
 
 ## License
 
