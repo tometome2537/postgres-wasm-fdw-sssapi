@@ -82,9 +82,8 @@ impl Guest for ExampleFdw {
         // extract source rows from response
         this.src_rows = resp_json
             .as_array()
-            .ok_or("cannot get rows from response")
-            .unwrap()
-            .to_owned();
+            .map(|v| v.to_owned())
+            .expect("response should be a JSON array");
 
         // output a Postgres INFO to user (visible in psql), also useful for debugging
         utils::report_info(&format!(
