@@ -107,7 +107,7 @@ impl Guest for ExampleFdw {
         // loop through each target column, map source cell to target cell
         for tgt_col in ctx.get_columns() {
             let (tgt_col_num, tgt_col_name) = (tgt_col.num(), tgt_col.name());
-            if let Some(src) = src_row.get(usize::try_from(tgt_col_num).unwrap() - 1) {
+            if let Some(src) = src_row.get(tgt_col_name.to_owned()) {
                 // we only support I64 and String cell types here, add more type
                 // conversions if you need
                 let cell = match tgt_col.type_oid() {
@@ -121,10 +121,28 @@ impl Guest for ExampleFdw {
                     }
                 };
 
+                // let v = match tgt_col.type_oid() {
+                //     TypeOid::Bool => "Bool",
+                //     TypeOid::I8 => "I8",
+                //     TypeOid::I16 => "I16",
+                //     TypeOid::F32 => "F32",
+                //     TypeOid::I32 => "I32",
+                //     TypeOid::F64 => "F64",
+                //     TypeOid::I64 => "I64",
+                //     TypeOid::Numeric => "Numeric",
+                //     TypeOid::String => "String",
+                //     TypeOid::Date => "Date",
+                //     TypeOid::Timestamp => "Timestamp",
+                //     TypeOid::Timestamptz => "Timestamptz",
+                //     TypeOid::Json => "Json",
+                // };
+
                 // push the cell to target row
+                // row.push(Some(&Cell::String(serde_json::to_string(&src).unwrap())));
                 row.push(cell.as_ref());
             } else {
-                row.push(None);
+                row.push(Some(&Cell::String(format!("{} is none", tgt_col_name))));
+                // row.push(None);
             }
         }
 
