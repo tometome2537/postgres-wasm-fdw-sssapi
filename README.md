@@ -24,7 +24,7 @@ create foreign data wrapper wasm_wrapper
 create server sssapi_server
   foreign data wrapper wasm_wrapper
   options (
-    fdw_package_url 'https://github.com/tometome2537/postgres-wasm-fdw-sssapi/releases/download/v1.0.2/wasm_fdw_sssapi.wasmwasm_fdw_example.wasm',
+    fdw_package_url 'https://github.com/ruchi12377/postgres-wasm-fdw-sssapi/releases/download/v1.0.2/wasm_fdw_sssapi.wasmwasm_fdw_example.wasm',
     fdw_package_name 'ruchi12377:sssapi-fdw',
     fdw_package_version '1.0.2',
     fdw_package_checksum '80e443224345f08283a653b881b60888eac09332bd655b76f9cb544518ff514d'
